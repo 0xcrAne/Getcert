@@ -8,6 +8,7 @@ import OpenSSL
 import argparse
 import sys
 import os
+from socket import setdefaulttimeout
 
 
 def usage():
@@ -16,6 +17,7 @@ def usage():
 
 
 def getcert(server, port=443):
+    setdefaulttimeout(3)
     try:
         cert = ssl.get_server_certificate((server, port))
     except Exception:
@@ -44,7 +46,6 @@ if __name__ == '__main__':
         elif sys.argv[1] in ['-f', '--file']:
             if os.path.isfile(args.file) == True:
                 with open(args.file) as target:
-                    hosts = []
                     hosts = target.read().splitlines()
                     for host in hosts:
                         issuedDic = getcert(host, port)
@@ -52,7 +53,7 @@ if __name__ == '__main__':
                             print(host + ":" + "未找到ssl信息")
                         else:
                             with open("result.txt", "a+") as f:
-                                f.write(host + ":" + issuedDic['issued_to'] + "\n")
+                                f.write(host + ":" + str(issuedDic['issued_to']) + "\n")
     else:
         parser.print_help()
         usage()
